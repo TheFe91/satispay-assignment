@@ -58,10 +58,9 @@ export function queryType(args: {
   const filterByType: (as: Pokemon[]) => Pokemon[] =
       queryType === undefined
           ? identity
-          : A.filter(p => p.types.map((t) => t.toLowerCase()).includes(queryType.toLowerCase()));
+          : A.filter(p => p.types.map((t: string) => t.toLowerCase()).includes(queryType.toLowerCase()));
 
   const sliceByAfter: (as: Pokemon[]) => Pokemon[] =
-      // filter only if q is defined
       after === undefined
           ? identity
           : as =>
@@ -79,5 +78,5 @@ export function queryType(args: {
       slice(0, limit + 1)
   );
 
-  return toConnection(results, SIZE);
+  return toConnection(results, limit);
 }
