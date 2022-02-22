@@ -6,7 +6,8 @@ type PageInfo {
 type Pokemon {
   id: ID!
   name: String
-  types: [String]
+  types: [String],
+  classification: String!,
 }
 
 type PokemonEdge {
@@ -22,5 +23,5 @@ type PokemonsConnection {
 type Query {
   pokemons(q: String, after: ID, limit: Int): PokemonsConnection
 
-  pokemonsByType(type: String!): PokemonsConnection
+  pokemonsByType(type: String!, after: Int, limit: Int): PokemonsConnection
 }
