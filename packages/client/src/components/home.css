@@ -46,7 +46,7 @@
 .ant-btn.ant-btn-primary[disabled]:hover {
     border-color: #1f68af;
     background: #1f68af;
-    opacity: .7;
+    opacity: .5;
     color: white;
 }
 

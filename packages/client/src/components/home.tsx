@@ -39,7 +39,7 @@ function Home() {
   const [currentTypeFilter, setCurrentTypeFilter] = useState<string | undefined>(undefined);
   const [currentPageSize, setCurrentPageSize] = useState<number>(STANDARD_PAGE_SIZE);
   const [currentQuery, setCurrentQuery] = useState<DocumentNode>(queries.POKEMONS);
-  const [filters, setFilters] = useState<string[]>([]);
+  const [filters, setFilters] = useState<Array<string>>([]);
 
   const [data, setData] = useState<QueryAdapterData>({
     nodes: [], dataSource: [], hasNextPage: false, endCursor: '',
@@ -69,6 +69,7 @@ function Home() {
   }, [pokemons]);
 
   const handleSearching = async (value: string) => {
+    setCurrentTypeFilter(undefined);
     const response: LazyQueryResult<PokemonQueryResult, PokemonQueryVars | PokemonByTypeQueryVars> = value
       ? await pokemons({
         variables: {
@@ -76,18 +77,12 @@ function Home() {
           limit: currentPageSize,
         },
       })
-      : currentTypeFilter
-        ? await pokemonsByType({
-          variables: {
-            type: currentTypeFilter,
-            limit: currentPageSize,
-          },
-        })
-        : await pokemons({
-          variables: {
-            limit: currentPageSize,
-          },
-        });
+      : await pokemonsByType({
+        variables: {
+          type: currentTypeFilter,
+          limit: currentPageSize,
+        },
+      });
 
     if (response.data) {
       const adaptedData: QueryAdapterData = GqlDataAdapter(response.data);
@@ -97,7 +92,7 @@ function Home() {
     setCurrentQuery(value && !currentTypeFilter ? queries.POKEMONS : queries.POKEMONS_BY_TYPE);
   };
 
-  const handleOnSelectChange = async (value: string | undefined) => {
+  const handleOnSelectChange = async (value: string) => {
     const response: LazyQueryResult<PokemonQueryResult, PokemonQueryVars | PokemonByTypeQueryVars> = value
       ? await pokemonsByType({
         variables: {
@@ -115,6 +110,7 @@ function Home() {
       const adaptedData: QueryAdapterData = GqlDataAdapter(response.data);
       setData(adaptedData);
     }
+    setCurrentSearch(undefined);
     setCurrentTypeFilter(value);
     setCurrentQuery(value ? queries.POKEMONS_BY_TYPE : queries.POKEMONS);
   };
@@ -163,7 +159,12 @@ function Home() {
       </div>
 
       <div className="controls-row">
-        <Search onSearch={handleSearching} placeholder="Filter by Pokémon" style={{ width: 200 }} />
+        <Search
+          onSearch={handleSearching}
+          placeholder="Filter by Pokémon"
+          style={{ width: 200 }}
+          value={currentSearch}
+        />
 
         {tError
           ? (<p>Filtering by type is not available</p>)
@@ -175,6 +176,7 @@ function Home() {
               placeholder="Filter by type"
               showSearch
               style={{ width: 200 }}
+              value={currentTypeFilter}
             >
               {filters.map((filter: string) => <Option key={filter} value={filter}>{filter}</Option>)}
             </Select>
