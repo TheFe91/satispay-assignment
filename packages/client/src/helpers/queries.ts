@@ -1,8 +1,8 @@
 import { gql } from '@apollo/client';
 
 const POKEMONS = gql`
-    query pokemons($q: String) {
-        pokemons(q: $q) {
+    query pokemons($q: String, $after: ID, $limit: Int) {
+        pokemons(q: $q, after: $after, limit: $limit) {
             edges {
                 node {
                     id
@@ -20,8 +20,8 @@ const POKEMONS = gql`
 `;
 
 const POKEMONS_BY_TYPE = gql`
-    {
-        pokemons {
+    query pokemonsByType($type: String!, $after: Int, $limit: Int) {
+        pokemonsByType(type: $type, after: $after, limit: $limit) {
             edges {
                 node {
                     id

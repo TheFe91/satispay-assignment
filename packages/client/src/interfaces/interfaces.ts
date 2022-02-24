@@ -11,6 +11,7 @@ interface Edge {
 
 interface PageInfo {
   hasNextPage: boolean;
+  endCursor: string;
 }
 
 interface QueryResult {
@@ -23,11 +24,30 @@ interface PokemonQueryResult {
   pokemons?: QueryResult;
 }
 
+interface PokemonQueryVars {
+  q?: string;
+  after?: string;
+  limit?: number;
+}
+
+interface PokemonByTypeQueryVars {
+  type?: string;
+  after?: string;
+  limit?: number;
+}
+
 interface PokemonDataSource {
   key: string;
   name: string;
-  type: string;
+  types: string;
   classification: string;
+}
+
+interface QueryAdapterData {
+  hasNextPage: boolean;
+  endCursor: string;
+  dataSource: PokemonDataSource[];
+  nodes: Node[];
 }
 
 export default PokemonQueryResult;
@@ -36,4 +56,7 @@ export type {
   Edge,
   Node,
   PokemonDataSource,
+  QueryAdapterData,
+  PokemonQueryVars,
+  PokemonByTypeQueryVars,
 };

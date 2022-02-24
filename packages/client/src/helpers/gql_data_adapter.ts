@@ -1,25 +1,27 @@
-import PokemonQueryResult, { Edge, PokemonDataSource } from '../interfaces/pokemonByType';
+import PokemonQueryResult, { Edge, PokemonDataSource, QueryAdapterData } from '../interfaces/interfaces';
 
-const GqlDataAdapter = (data: PokemonQueryResult) => {
+function GqlDataAdapter(data: PokemonQueryResult): QueryAdapterData {
   const { pokemonsByType, pokemons } = data;
 
-  const { pageInfo, edges } = (pokemons || pokemonsByType)!;
+  const { pageInfo: { hasNextPage, endCursor }, edges } = (pokemons || pokemonsByType)!;
 
-  const nodes: PokemonDataSource[] = edges.map(({
+  const dataSource: PokemonDataSource[] = edges.map(({
     node: {
       id, name, types, classification,
     },
   }: Edge) => ({
     key: id,
     name,
-    type: types.reduce((acc: string, el: string) => `${acc} ${el}`, ''),
+    types: types.reduce((acc: string, el: string) => `${acc}${el} - `, '').slice(0, -3),
     classification,
   }));
 
   return {
-    hasNextPage: pageInfo.hasNextPage,
-    nodes,
+    hasNextPage,
+    endCursor,
+    dataSource,
+    nodes: edges.map(({ node }) => node),
   };
-};
+}
 
 export default GqlDataAdapter;

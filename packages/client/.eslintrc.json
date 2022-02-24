@@ -19,10 +19,36 @@
     },
     "plugins": [
         "react",
+        "react-hooks",
         "@typescript-eslint"
     ],
     "rules": {
         "no-console": "off",
-        "max-len": "off"
+        "max-len": "off",
+        "react-hooks/exhaustive-deps": "warn",
+        "react-hooks/rules-of-hooks": "error",
+        "react/destructuring-assignment": "off",
+        "react/forbid-prop-types": "off",
+        "react/jsx-filename-extension": "off",
+        "react/jsx-newline": ["error", { "prevent": false }],
+        "react/jsx-no-duplicate-props": ["error", { "ignoreCase": false }],
+        "react/jsx-no-useless-fragment": "error",
+        "react/jsx-props-no-spreading": "off",
+        "react/jsx-sort-props": ["error", {
+            "callbacksLast": false,
+            "ignoreCase": true,
+            "noSortAlphabetically": false,
+            "reservedFirst": [
+                "key"
+            ],
+            "shorthandFirst": false,
+            "shorthandLast": false
+        }],
+        "react/no-access-state-in-setstate": "off",
+        "react/no-array-index-key": "off",
+        "react/prop-types": "off",
+        "react/require-default-props": "off",
+        "react/state-in-constructor": "off",
+        "react/static-property-placement": "off"
     }
 }
