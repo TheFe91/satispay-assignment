@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {
-  Button, Input, Result, Select, Table,
-} from 'antd';
+import { Button, Table } from 'antd';
 import {
   ApolloQueryResult, DocumentNode, LazyQueryResult, useLazyQuery, useQuery,
 } from '@apollo/client';
@@ -9,9 +7,9 @@ import GqlDataAdapter, { GqlTypesAdapter } from '../helpers/gql_data_adapter';
 import PokemonQueryResult, { PokemonByTypeQueryVars, PokemonQueryVars, QueryAdapterData } from '../interfaces/interfaces';
 import queries from '../helpers/queries';
 import './home.css';
-
-const { Search } = Input;
-const { Option } = Select;
+import ControlsRow from './ControlsRow';
+import Error from './Error';
+import Logo from './Logo';
 
 const columns = [
   {
@@ -32,7 +30,6 @@ const columns = [
 ];
 
 const STANDARD_PAGE_SIZE: number = 10;
-const LOGO_URL: string = 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/98/International_Pok%C3%A9mon_logo.svg/2560px-International_Pok%C3%A9mon_logo.svg.png';
 
 function Home() {
   const [currentSearch, setCurrentSearch] = useState<string | undefined>(undefined);
@@ -68,57 +65,6 @@ function Home() {
     });
   }, [pokemons]);
 
-  const handleSearching = async (value: string) => {
-    const response: LazyQueryResult<PokemonQueryResult, PokemonQueryVars | PokemonByTypeQueryVars> = value
-      ? await pokemons({
-        variables: {
-          q: value,
-          limit: currentPageSize,
-        },
-      })
-      : currentTypeFilter
-        ? await pokemonsByType({
-          variables: {
-            type: currentTypeFilter,
-            limit: currentPageSize,
-          },
-        })
-        : await pokemons({
-          variables: {
-            limit: currentPageSize,
-          },
-        });
-
-    if (response.data) {
-      const adaptedData: QueryAdapterData = GqlDataAdapter(response.data);
-      setData(adaptedData);
-    }
-    setCurrentSearch(value);
-    setCurrentQuery(value && !currentTypeFilter ? queries.POKEMONS : queries.POKEMONS_BY_TYPE);
-  };
-
-  const handleOnSelectChange = async (value: string | undefined) => {
-    const response: LazyQueryResult<PokemonQueryResult, PokemonQueryVars | PokemonByTypeQueryVars> = value
-      ? await pokemonsByType({
-        variables: {
-          type: value,
-          limit: currentPageSize,
-        },
-      }) : await pokemons({
-        variables: {
-          q: currentSearch,
-          limit: currentPageSize,
-        },
-      });
-
-    if (response.data) {
-      const adaptedData: QueryAdapterData = GqlDataAdapter(response.data);
-      setData(adaptedData);
-    }
-    setCurrentTypeFilter(value);
-    setCurrentQuery(value ? queries.POKEMONS_BY_TYPE : queries.POKEMONS);
-  };
-
   const handleLoadMore = async () => {
     const response: ApolloQueryResult<PokemonQueryResult> = currentQuery === queries.POKEMONS
       ? await pFetchMore({
@@ -145,64 +91,29 @@ function Home() {
     setCurrentPageSize(newData.dataSource.length);
   };
 
-  return pError || pbtError ? (
-    <Result
-      status="warning"
-      title="There were issues while retrieving the data"
-    />
-  ) : (
-    <div className="container">
-      <div className="logo-container">
-        <img
-          alt="logo"
-          className="logo-img"
-          src={LOGO_URL}
+  return pError || pbtError
+    ? <Error />
+    : (
+      <div className="container">
+
+        <Logo />
+
+        <ControlsRow />
+
+        <Table
+          columns={columns}
+          dataSource={data.dataSource}
+          loading={pLoading || pbtLoading || tLoading}
+          pagination={false}
         />
 
-        <p style={{ fontStyle: 'italic' }}>by Alessandro Defendenti for Satispay</p>
+        <div className="load-more-container">
+          <Button disabled={!data.hasNextPage} onClick={handleLoadMore} shape="round" size="large" type="primary">
+            Load more
+          </Button>
+        </div>
       </div>
-
-      <div className="controls-row">
-        <Search onSearch={handleSearching} placeholder="Filter by Pokémon" style={{ width: 200 }} />
-
-        {tError
-          ? (<p>Filtering by type is not available</p>)
-          : (
-            <Select
-              allowClear
-              onChange={handleOnSelectChange}
-              optionFilterProp="children"
-              placeholder="Filter by type"
-              showSearch
-              style={{ width: 200 }}
-            >
-              {filters.map((filter: string) => <Option key={filter} value={filter}>{filter}</Option>)}
-            </Select>
-          )}
-
-        Showing
-        {' '}
-
-        <strong>{currentPageSize}</strong>
-
-        {' '}
-        results
-      </div>
-
-      <Table
-        columns={columns}
-        dataSource={data.dataSource}
-        loading={pLoading || pbtLoading || tLoading}
-        pagination={false}
-      />
-
-      <div className="load-more-container">
-        <Button disabled={!data.hasNextPage} onClick={handleLoadMore} shape="round" size="large" type="primary">
-          Load more
-        </Button>
-      </div>
-    </div>
-  );
+    );
 }
 
 export default Home;
