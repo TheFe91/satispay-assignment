@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Table } from 'antd';
+import { Table } from 'antd';
 import {
-  ApolloQueryResult, DocumentNode, LazyQueryResult, useLazyQuery, useQuery,
+  DocumentNode, LazyQueryResult, useLazyQuery, useQuery,
 } from '@apollo/client';
 import GqlDataAdapter, { GqlTypesAdapter } from '../helpers/gql_data_adapter';
 import PokemonQueryResult, { PokemonByTypeQueryVars, PokemonQueryVars, QueryAdapterData } from '../interfaces/interfaces';
@@ -10,6 +10,7 @@ import './home.css';
 import ControlsRow from './ControlsRow';
 import Error from './Error';
 import Logo from './Logo';
+import LoadMore from './LoadMore';
 
 const columns = [
   {
@@ -65,32 +66,6 @@ function Home() {
     });
   }, [pokemons]);
 
-  const handleLoadMore = async () => {
-    const response: ApolloQueryResult<PokemonQueryResult> = currentQuery === queries.POKEMONS
-      ? await pFetchMore({
-        variables: {
-          q: currentSearch,
-          after: data.endCursor,
-        },
-      })
-      : await pbtFetchMore({
-        variables: {
-          type: currentTypeFilter,
-          after: data.endCursor,
-        },
-      });
-
-    const adaptedData = GqlDataAdapter(response.data);
-    const newData: QueryAdapterData = {
-      dataSource: [...data.dataSource, ...adaptedData.dataSource],
-      nodes: [...data.nodes, ...adaptedData.nodes],
-      endCursor: adaptedData.endCursor,
-      hasNextPage: adaptedData.hasNextPage,
-    };
-    setData(newData);
-    setCurrentPageSize(newData.dataSource.length);
-  };
-
   return pError || pbtError
     ? <Error />
     : (
@@ -118,17 +93,16 @@ function Home() {
           pagination={false}
         />
 
-        <div className="load-more-container">
-          <Button
-            disabled={!data.hasNextPage}
-            onClick={handleLoadMore}
-            shape="round"
-            size="large"
-            type="primary"
-          >
-            Load more
-          </Button>
-        </div>
+        <LoadMore
+          currentQuery={currentQuery}
+          currentSearch={currentSearch}
+          currentTypeFilter={currentTypeFilter}
+          data={data}
+          pbtFetchMore={pbtFetchMore}
+          pFetchMore={pFetchMore}
+          setCurrentPageSize={setCurrentPageSize}
+          setData={setData}
+        />
       </div>
     );
 }

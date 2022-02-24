@@ -84,7 +84,11 @@ function ControlsRow({
 
   return (
     <div className="controls-row">
-      <Search onSearch={handleSearching} placeholder="Filter by Pokémon" style={{ width: 200 }} />
+      <Search
+        onSearch={handleSearching}
+        placeholder="Filter by Pokémon"
+        style={{ width: 200 }}
+      />
 
       {tError
         ? (<p>Filtering by type is not available</p>)
