@@ -31,7 +31,8 @@ const columns = [
   },
 ];
 
-const STANDARD_PAGE_SIZE = 10;
+const STANDARD_PAGE_SIZE: number = 10;
+const LOGO_URL: string = 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/98/International_Pok%C3%A9mon_logo.svg/2560px-International_Pok%C3%A9mon_logo.svg.png';
 
 function Home() {
   const [currentSearch, setCurrentSearch] = useState<string | undefined>(undefined);
@@ -151,6 +152,16 @@ function Home() {
     />
   ) : (
     <div className="container">
+      <div className="logo-container">
+        <img
+          alt="logo"
+          className="logo-img"
+          src={LOGO_URL}
+        />
+
+        <p style={{ fontStyle: 'italic' }}>by Alessandro Defendenti for Satispay</p>
+      </div>
+
       <div className="controls-row">
         <Search onSearch={handleSearching} placeholder="Filter by Pokémon" style={{ width: 200 }} />
 
@@ -185,8 +196,10 @@ function Home() {
         pagination={false}
       />
 
-      <div className="load-more-btn">
-        <Button disabled={!data.hasNextPage} onClick={handleLoadMore}>Load more</Button>
+      <div className="load-more-container">
+        <Button disabled={!data.hasNextPage} onClick={handleLoadMore} shape="round" size="large" type="primary">
+          Load more
+        </Button>
       </div>
     </div>
   );
