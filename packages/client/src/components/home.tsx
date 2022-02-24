@@ -159,7 +159,7 @@ function Home() {
           src={LOGO_URL}
         />
 
-        <p style={{ fontStyle: 'italic' }}>by Alessandro Defendenti for Satispay</p>
+        <p className="subtitle">by Alessandro Defendenti for Satispay</p>
       </div>
 
       <div className="controls-row">
@@ -180,16 +180,19 @@ function Home() {
             </Select>
           )}
 
-        Showing
-        {' '}
+        <p>
+          Showing
+          {' '}
 
-        <strong>{currentPageSize}</strong>
+          <strong>{currentPageSize}</strong>
 
-        {' '}
-        results
+          {' '}
+          results
+        </p>
       </div>
 
       <Table
+        bordered
         columns={columns}
         dataSource={data.dataSource}
         loading={pLoading || pbtLoading || tLoading}
