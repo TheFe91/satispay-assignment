@@ -66,7 +66,7 @@ export function queryType(args: {
           : as =>
               pipe(
                   as,
-                  A.findIndex(a => a.id >= after),
+                  A.findIndex(a => a.id === after),
                   O.map(a => a + 1),
                   O.fold(() => as, idx => as.slice(idx))
               );

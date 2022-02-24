@@ -20,7 +20,7 @@ const POKEMONS = gql`
 `;
 
 const POKEMONS_BY_TYPE = gql`
-    query pokemonsByType($type: String!, $after: Int, $limit: Int) {
+    query pokemonsByType($type: String!, $after: ID, $limit: Int) {
         pokemonsByType(type: $type, after: $after, limit: $limit) {
             edges {
                 node {
@@ -38,7 +38,20 @@ const POKEMONS_BY_TYPE = gql`
     }
 `;
 
+const TYPES = gql`
+    {
+        pokemons(limit: 151) {
+            edges {
+                node {
+                    types
+                }
+            }
+        }
+    }
+`;
+
 export default {
   POKEMONS,
   POKEMONS_BY_TYPE,
+  TYPES,
 };

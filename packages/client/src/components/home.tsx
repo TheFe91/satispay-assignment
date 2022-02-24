@@ -1,11 +1,14 @@
+/* eslint-disable */
 import React, { useEffect, useState } from 'react';
 import {
   Button, Col,
   Input, Result, Row, Select, Table,
 } from 'antd';
-import { ApolloQueryResult, useQuery } from '@apollo/client';
-import GqlDataAdapter from '../helpers/gql_data_adapter';
-import PokemonQueryResult, { PokemonQueryVars, QueryAdapterData } from '../interfaces/interfaces';
+import {
+  ApolloQueryResult, DocumentNode, LazyQueryResult, useLazyQuery, useQuery,
+} from '@apollo/client';
+import GqlDataAdapter, { GqlTypesAdapter } from '../helpers/gql_data_adapter';
+import PokemonQueryResult, { PokemonByTypeQueryVars, PokemonQueryVars, QueryAdapterData } from '../interfaces/interfaces';
 import queries from '../helpers/queries';
 
 const { Search } = Input;
@@ -33,49 +36,103 @@ const STANDARD_PAGE_SIZE = 10;
 
 function Home() {
   const [currentSearch, setCurrentSearch] = useState<string | undefined>(undefined);
+  const [currentTypeFilter, setCurrentTypeFilter] = useState<string | undefined>(undefined);
   const [currentPageSize, setCurrentPageSize] = useState<number>(STANDARD_PAGE_SIZE);
+  const [currentQuery, setCurrentQuery] = useState<DocumentNode>(queries.POKEMONS);
+  const [filters, setFilters] = useState<string[]>([]);
+
   const [data, setData] = useState<QueryAdapterData>({
     nodes: [], dataSource: [], hasNextPage: false, endCursor: '',
   });
-  const {
-    loading, error, data: queryData, fetchMore,
-  } = useQuery<PokemonQueryResult, PokemonQueryVars>(queries.POKEMONS, {
-    variables: {
 
-    },
-  });
+  const { loading: tLoading, error: tError, data: tData } = useQuery(queries.TYPES);
+
+  const [pokemons, {
+    loading: pLoading, error: pError, fetchMore: pFetchMore,
+  }] = useLazyQuery<PokemonQueryResult, PokemonQueryVars>(queries.POKEMONS);
+
+  const [pokemonsByType, {
+    loading: pbtLoading, error: pbtError, fetchMore: pbtFetchMore,
+  }] = useLazyQuery<PokemonQueryResult, PokemonByTypeQueryVars>(queries.POKEMONS_BY_TYPE);
 
   useEffect(() => {
-    if (queryData) {
-      const adaptedData = GqlDataAdapter(queryData);
+    setFilters(GqlTypesAdapter(tData));
+  }, [tData]);
+
+  useEffect(() => {
+    pokemons().then((response: LazyQueryResult<PokemonQueryResult, PokemonQueryVars>) => {
+      if (response.data) {
+        const adaptedData: QueryAdapterData = GqlDataAdapter(response.data);
+        setData(adaptedData);
+      }
+    });
+  }, [pokemons]);
+
+  const handleSearching = async (value: string) => {
+    const response: LazyQueryResult<PokemonQueryResult, PokemonQueryVars | PokemonByTypeQueryVars> = value
+      ? await pokemons({
+        variables: {
+          q: value,
+          limit: currentPageSize,
+        },
+      })
+      : currentTypeFilter
+        ? await pokemonsByType({
+          variables: {
+            type: currentTypeFilter,
+            limit: currentPageSize,
+          },
+        })
+        : await pokemons({
+          variables: {
+            limit: currentPageSize,
+          },
+        });
+
+    if (response.data) {
+      const adaptedData: QueryAdapterData = GqlDataAdapter(response.data);
       setData(adaptedData);
     }
-  }, [queryData]);
-
-  const handleSearching = async (value: string | undefined) => {
     setCurrentSearch(value);
-    const response: ApolloQueryResult<PokemonQueryResult> = await fetchMore({
-      variables: {
-        q: value,
-        limit: currentPageSize,
-      },
-    });
-
-    const adaptedData: QueryAdapterData = GqlDataAdapter(response.data);
-    setData(adaptedData);
+    setCurrentQuery(value && !currentTypeFilter ? queries.POKEMONS : queries.POKEMONS_BY_TYPE);
   };
 
-  const handleOnSelectSearch = (value: string) => {
-    console.debug(value);
+  const handleOnSelectChange = async (value: string | undefined) => {
+    const response: LazyQueryResult<PokemonQueryResult, PokemonQueryVars | PokemonByTypeQueryVars> = value
+      ? await pokemonsByType({
+        variables: {
+          type: value,
+          limit: currentPageSize,
+        },
+      }) : await pokemons({
+        variables: {
+          q: currentSearch,
+          limit: currentPageSize,
+        },
+      });
+
+    if (response.data) {
+      const adaptedData: QueryAdapterData = GqlDataAdapter(response.data);
+      setData(adaptedData);
+    }
+    setCurrentTypeFilter(value);
+    setCurrentQuery(value ? queries.POKEMONS_BY_TYPE : queries.POKEMONS);
   };
 
   const handleLoadMore = async () => {
-    const response: ApolloQueryResult<PokemonQueryResult> = await fetchMore({
-      variables: {
-        q: currentSearch,
-        after: data.endCursor,
-      },
-    });
+    const response: ApolloQueryResult<PokemonQueryResult> = currentQuery === queries.POKEMONS
+      ? await pFetchMore({
+        variables: {
+          q: currentSearch,
+          after: data.endCursor,
+        },
+      })
+      : await pbtFetchMore({
+        variables: {
+          type: currentTypeFilter,
+          after: data.endCursor,
+        },
+      });
 
     const adaptedData = GqlDataAdapter(response.data);
     const newData: QueryAdapterData = {
@@ -88,9 +145,7 @@ function Home() {
     setCurrentPageSize(newData.dataSource.length);
   };
 
-  const filters = [...new Set(data.nodes.map(({ types }) => types.flat()).flat())].sort();
-
-  return error ? (
+  return pError || pbtError ? (
     <Result
       status="warning"
       title="There were issues while retrieving the data"
@@ -98,23 +153,25 @@ function Home() {
   ) : (
     <div>
       <Row justify="center">
-        <Col span={6}>
+        <Col span={4}>
           <Search onSearch={handleSearching} placeholder="Filter by Pokémon" style={{ width: 200 }} />
         </Col>
 
-        <Col span={6}>
-          <Select
-            allowClear
-            onSearch={handleOnSelectSearch}
-            optionFilterProp="children"
-            placeholder="Select a type"
-            showSearch
-          >
-            {filters.map((filter: string) => <Option key={filter} value={filter}>{filter}</Option>)}
-          </Select>
-        </Col>
+        {!tError && (
+          <Col span={4}>
+            <Select
+              allowClear
+              onChange={handleOnSelectChange}
+              optionFilterProp="children"
+              placeholder="Select a type"
+              showSearch
+            >
+              {filters.map((filter: string) => <Option key={filter} value={filter}>{filter}</Option>)}
+            </Select>
+          </Col>
+        )}
 
-        <Col span={6}>
+        <Col span={4}>
           <p>
             Current page size is:
 
@@ -123,16 +180,19 @@ function Home() {
             {currentPageSize}
           </p>
         </Col>
+
+        <Col span={4}>
+          <Button onClick={handleLoadMore} disabled={!data.hasNextPage}>Load more</Button>
+        </Col>
       </Row>
 
       <Table
         columns={columns}
         dataSource={data.dataSource}
-        loading={loading}
+        loading={pLoading || pbtLoading || tLoading}
         pagination={false}
+        scroll={{ y: 550 }}
       />
-
-      {data.hasNextPage && <Button onClick={handleLoadMore}>Load more</Button>}
     </div>
   );
 }

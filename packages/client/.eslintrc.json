@@ -24,6 +24,7 @@
     ],
     "rules": {
         "no-console": "off",
+        "no-nested-ternary": "off",
         "max-len": "off",
         "react-hooks/exhaustive-deps": "warn",
         "react-hooks/rules-of-hooks": "error",
