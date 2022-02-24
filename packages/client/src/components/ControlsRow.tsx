@@ -88,6 +88,7 @@ function ControlsRow({
         onSearch={handleSearching}
         placeholder="Filter by Pokémon"
         style={{ width: 200 }}
+        value={currentSearch}
       />
 
       {tError
@@ -100,6 +101,7 @@ function ControlsRow({
             placeholder="Filter by type"
             showSearch
             style={{ width: 200 }}
+            value={currentTypeFilter}
           >
             {filters.map((filter: string) => <Option key={filter} value={filter}>{filter}</Option>)}
           </Select>
