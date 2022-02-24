@@ -20,7 +20,7 @@ const POKEMONS = gql`
 `;
 
 const POKEMONS_BY_TYPE = gql`
-    query pokemonsByType($type: String!, $after: ID, $limit: Int) {
+    query pokemonsByType($type: String, $after: ID, $limit: Int) {
         pokemonsByType(type: $type, after: $after, limit: $limit) {
             edges {
                 node {

@@ -2,7 +2,7 @@ interface Node {
   classification: string;
   id: string;
   name: string;
-  types: string[];
+  types: Array<string>;
 }
 
 interface Edge {
@@ -15,7 +15,7 @@ interface PageInfo {
 }
 
 interface QueryResult {
-  edges: Edge[];
+  edges: Array<Edge>;
   pageInfo: PageInfo;
 }
 
@@ -46,8 +46,8 @@ interface PokemonDataSource {
 interface QueryAdapterData {
   hasNextPage: boolean;
   endCursor: string;
-  dataSource: PokemonDataSource[];
-  nodes: Node[];
+  dataSource: Array<PokemonDataSource>;
+  nodes: Array<Node>;
 }
 
 export default PokemonQueryResult;

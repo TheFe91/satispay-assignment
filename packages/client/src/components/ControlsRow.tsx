@@ -1,13 +1,40 @@
 import { Input, Select } from 'antd';
 import React from 'react';
-import { LazyQueryResult } from '@apollo/client';
+import { ApolloError, LazyQueryResult, useLazyQuery } from '@apollo/client';
 import PokemonQueryResult, { PokemonByTypeQueryVars, PokemonQueryVars, QueryAdapterData } from '../interfaces/interfaces';
 import GqlDataAdapter from '../helpers/gql_data_adapter';
 import queries from '../helpers/queries';
 
 const { Search } = Input;
+const { Option } = Select;
 
-function ControlsRow() {
+interface ControlsRowProps {
+  filters: Array<string>;
+  currentPageSize: number;
+  currentTypeFilter: string | undefined;
+  setData: Function;
+  setCurrentSearch: Function;
+  setCurrentTypeFilter: Function;
+  setCurrentQuery: Function;
+  currentSearch: string | undefined;
+  tError: ApolloError | undefined;
+}
+
+function ControlsRow({
+  filters,
+  currentPageSize,
+  currentTypeFilter,
+  setData,
+  setCurrentSearch,
+  setCurrentTypeFilter,
+  setCurrentQuery,
+  currentSearch,
+  tError,
+}: ControlsRowProps) {
+  const [pokemons] = useLazyQuery<PokemonQueryResult, PokemonQueryVars>(queries.POKEMONS);
+
+  const [pokemonsByType] = useLazyQuery<PokemonQueryResult, PokemonByTypeQueryVars>(queries.POKEMONS_BY_TYPE);
+
   const handleSearching = async (value: string) => {
     const response: LazyQueryResult<PokemonQueryResult, PokemonQueryVars | PokemonByTypeQueryVars> = value
       ? await pokemons({
@@ -16,28 +43,23 @@ function ControlsRow() {
           limit: currentPageSize,
         },
       })
-      : currentTypeFilter
-        ? await pokemonsByType({
-          variables: {
-            type: currentTypeFilter,
-            limit: currentPageSize,
-          },
-        })
-        : await pokemons({
-          variables: {
-            limit: currentPageSize,
-          },
-        });
+      : await pokemonsByType({
+        variables: {
+          type: currentTypeFilter,
+          limit: currentPageSize,
+        },
+      });
 
     if (response.data) {
       const adaptedData: QueryAdapterData = GqlDataAdapter(response.data);
       setData(adaptedData);
     }
     setCurrentSearch(value);
+    setCurrentTypeFilter(undefined);
     setCurrentQuery(value && !currentTypeFilter ? queries.POKEMONS : queries.POKEMONS_BY_TYPE);
   };
 
-  const handleOnSelectChange = async (value: string | undefined) => {
+  const handleOnSelectChange = async (value: string) => {
     const response: LazyQueryResult<PokemonQueryResult, PokemonQueryVars | PokemonByTypeQueryVars> = value
       ? await pokemonsByType({
         variables: {
@@ -55,6 +77,7 @@ function ControlsRow() {
       const adaptedData: QueryAdapterData = GqlDataAdapter(response.data);
       setData(adaptedData);
     }
+    setCurrentSearch(undefined);
     setCurrentTypeFilter(value);
     setCurrentQuery(value ? queries.POKEMONS_BY_TYPE : queries.POKEMONS);
   };

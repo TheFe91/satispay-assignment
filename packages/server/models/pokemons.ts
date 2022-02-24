@@ -49,7 +49,7 @@ export function query(args: {
 }
 
 export function queryType(args: {
-  type: string;
+  type?: string;
   after?: string;
   limit?: number;
 }): Connection<Pokemon>  {

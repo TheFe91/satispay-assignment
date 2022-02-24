@@ -36,7 +36,7 @@ function Home() {
   const [currentTypeFilter, setCurrentTypeFilter] = useState<string | undefined>(undefined);
   const [currentPageSize, setCurrentPageSize] = useState<number>(STANDARD_PAGE_SIZE);
   const [currentQuery, setCurrentQuery] = useState<DocumentNode>(queries.POKEMONS);
-  const [filters, setFilters] = useState<string[]>([]);
+  const [filters, setFilters] = useState<Array<string>>([]);
 
   const [data, setData] = useState<QueryAdapterData>({
     nodes: [], dataSource: [], hasNextPage: false, endCursor: '',
@@ -48,7 +48,7 @@ function Home() {
     loading: pLoading, error: pError, fetchMore: pFetchMore,
   }] = useLazyQuery<PokemonQueryResult, PokemonQueryVars>(queries.POKEMONS);
 
-  const [pokemonsByType, {
+  const [, {
     loading: pbtLoading, error: pbtError, fetchMore: pbtFetchMore,
   }] = useLazyQuery<PokemonQueryResult, PokemonByTypeQueryVars>(queries.POKEMONS_BY_TYPE);
 
@@ -98,9 +98,20 @@ function Home() {
 
         <Logo />
 
-        <ControlsRow />
+        <ControlsRow
+          currentPageSize={currentPageSize}
+          currentSearch={currentSearch}
+          currentTypeFilter={currentTypeFilter}
+          filters={filters}
+          setCurrentQuery={setCurrentQuery}
+          setCurrentSearch={setCurrentSearch}
+          setCurrentTypeFilter={setCurrentTypeFilter}
+          setData={setData}
+          tError={tError}
+        />
 
         <Table
+          bordered
           columns={columns}
           dataSource={data.dataSource}
           loading={pLoading || pbtLoading || tLoading}
@@ -108,7 +119,13 @@ function Home() {
         />
 
         <div className="load-more-container">
-          <Button disabled={!data.hasNextPage} onClick={handleLoadMore} shape="round" size="large" type="primary">
+          <Button
+            disabled={!data.hasNextPage}
+            onClick={handleLoadMore}
+            shape="round"
+            size="large"
+            type="primary"
+          >
             Load more
           </Button>
         </div>
