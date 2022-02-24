@@ -1,8 +1,6 @@
-/* eslint-disable */
 import React, { useEffect, useState } from 'react';
 import {
-  Button, Col,
-  Input, Result, Row, Select, Table,
+  Button, Input, Result, Select, Table,
 } from 'antd';
 import {
   ApolloQueryResult, DocumentNode, LazyQueryResult, useLazyQuery, useQuery,
@@ -10,6 +8,7 @@ import {
 import GqlDataAdapter, { GqlTypesAdapter } from '../helpers/gql_data_adapter';
 import PokemonQueryResult, { PokemonByTypeQueryVars, PokemonQueryVars, QueryAdapterData } from '../interfaces/interfaces';
 import queries from '../helpers/queries';
+import './home.css';
 
 const { Search } = Input;
 const { Option } = Select;
@@ -151,48 +150,44 @@ function Home() {
       title="There were issues while retrieving the data"
     />
   ) : (
-    <div>
-      <Row justify="center">
-        <Col span={4}>
-          <Search onSearch={handleSearching} placeholder="Filter by Pokémon" style={{ width: 200 }} />
-        </Col>
+    <div className="container">
+      <div className="controls-row">
+        <Search onSearch={handleSearching} placeholder="Filter by Pokémon" style={{ width: 200 }} />
 
-        {!tError && (
-          <Col span={4}>
+        {tError
+          ? (<p>Filtering by type is not available</p>)
+          : (
             <Select
               allowClear
               onChange={handleOnSelectChange}
               optionFilterProp="children"
-              placeholder="Select a type"
+              placeholder="Filter by type"
               showSearch
+              style={{ width: 200 }}
             >
               {filters.map((filter: string) => <Option key={filter} value={filter}>{filter}</Option>)}
             </Select>
-          </Col>
-        )}
+          )}
 
-        <Col span={4}>
-          <p>
-            Current page size is:
+        Showing
+        {' '}
 
-            {' '}
+        <strong>{currentPageSize}</strong>
 
-            {currentPageSize}
-          </p>
-        </Col>
-
-        <Col span={4}>
-          <Button onClick={handleLoadMore} disabled={!data.hasNextPage}>Load more</Button>
-        </Col>
-      </Row>
+        {' '}
+        results
+      </div>
 
       <Table
         columns={columns}
         dataSource={data.dataSource}
         loading={pLoading || pbtLoading || tLoading}
         pagination={false}
-        scroll={{ y: 550 }}
       />
+
+      <div className="load-more-btn">
+        <Button disabled={!data.hasNextPage} onClick={handleLoadMore}>Load more</Button>
+      </div>
     </div>
   );
 }
