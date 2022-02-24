@@ -69,7 +69,6 @@ function Home() {
   }, [pokemons]);
 
   const handleSearching = async (value: string) => {
-    setCurrentTypeFilter(undefined);
     const response: LazyQueryResult<PokemonQueryResult, PokemonQueryVars | PokemonByTypeQueryVars> = value
       ? await pokemons({
         variables: {
@@ -89,6 +88,7 @@ function Home() {
       setData(adaptedData);
     }
     setCurrentSearch(value);
+    setCurrentTypeFilter(undefined);
     setCurrentQuery(value && !currentTypeFilter ? queries.POKEMONS : queries.POKEMONS_BY_TYPE);
   };
 
