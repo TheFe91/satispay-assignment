@@ -1,8 +1,8 @@
 import React from 'react';
 import { Provider } from 'react-redux';
 
-import Home from './components/Home';
-import { store } from './store/configureStore';
+import Home from '@Components/Home';
+import { store } from '@Store/configureStore';
 
 function App() {
   return (

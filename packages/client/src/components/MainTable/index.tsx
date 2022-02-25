@@ -1,9 +1,10 @@
 import { Table } from 'antd';
 import React from 'react';
 import { useSelector } from 'react-redux';
+
+import { QueryAdapterData } from '@Interfaces/interfaces';
+import selectors from '@State/selectors';
 import columns from './columns';
-import { QueryAdapterData } from '../../interfaces/interfaces';
-import selectors from '../../store/state/selectors';
 
 const { getData } = selectors;
 

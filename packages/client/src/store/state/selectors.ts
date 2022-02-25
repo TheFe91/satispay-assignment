@@ -1,4 +1,4 @@
-import { RootState } from '../configureStore';
+import { RootState } from '@Store/configureStore';
 
 const getCurrentSearch = ({ pokemon: { currentSearch } }: RootState) => currentSearch;
 const getCurrentTypeFilter = ({ pokemon: { currentTypeFilter } }: RootState) => currentTypeFilter;

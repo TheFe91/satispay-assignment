@@ -1,6 +1,6 @@
 /* eslint-disable no-param-reassign */
 import { createSlice, Draft, PayloadAction } from '@reduxjs/toolkit';
-import { QueryAdapterData } from '../../interfaces/interfaces';
+import { QueryAdapterData } from '@Interfaces/interfaces';
 
 const STANDARD_PAGE_SIZE: number = 10;
 
