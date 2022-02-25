@@ -24,7 +24,7 @@ function GqlDataAdapter(data: PokemonQueryResult): QueryAdapterData {
   };
 }
 
-function GqlTypesAdapter(data: PokemonQueryResult) {
+function GqlTypesAdapter(data: PokemonQueryResult): Array<string> {
   if (data) {
     const { pokemons } = data;
 

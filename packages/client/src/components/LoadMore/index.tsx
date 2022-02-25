@@ -1,13 +1,14 @@
-import { ApolloQueryResult } from '@apollo/client';
 import { Button } from 'antd';
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import PokemonQueryResult, { QueryAdapterData } from '@Interfaces/interfaces';
+import { QueryAdapterData } from '@Interfaces/interfaces';
 import selectors from '@State/selectors';
-import { setData, setCurrentPageSize } from '@State/pokemonSlice';
-import GqlDataAdapter from '@Helpers/gql_data_adapter';
+import thunks from '@State/thunks';
 import './_styles.css';
+import { PerformLoadMoreType, PerformSearchOptions } from '@State/interfaces';
+
+const { performLoadMore } = thunks;
 
 const {
   getData, getCurrentQuery, getCurrentSearch, getCurrentTypeFilter,
@@ -27,34 +28,31 @@ function LoadMore({
   const currentQuery: string = useSelector(getCurrentQuery);
   const currentSearch: string | undefined = useSelector(getCurrentSearch);
   const currentTypeFilter: string | undefined = useSelector(getCurrentTypeFilter);
-  const {
-    endCursor, hasNextPage, dataSource, nodes,
-  }: QueryAdapterData = useSelector(getData);
+  const { endCursor, hasNextPage }: QueryAdapterData = useSelector(getData);
 
   const handleLoadMore = async () => {
-    const response: ApolloQueryResult<PokemonQueryResult> = currentQuery === 'POKEMONS'
-      ? await pFetchMore({
+    const options: PerformSearchOptions = currentQuery === 'POKEMONS'
+      ? {
         variables: {
           q: currentSearch,
           after: endCursor,
         },
-      })
-      : await pbtFetchMore({
+      }
+      : {
         variables: {
           type: currentTypeFilter,
           after: endCursor,
         },
-      });
+      };
 
-    const adaptedData = GqlDataAdapter(response.data);
-    const newData: QueryAdapterData = {
-      dataSource: [...dataSource, ...adaptedData.dataSource],
-      nodes: [...nodes, ...adaptedData.nodes],
-      endCursor: adaptedData.endCursor,
-      hasNextPage: adaptedData.hasNextPage,
+    const executor: Function = currentQuery === 'POKEMONS' ? pFetchMore : pbtFetchMore;
+
+    const loadMoreInput: PerformLoadMoreType = {
+      executor,
+      options,
     };
-    dispatch(setData(newData));
-    dispatch(setCurrentPageSize(newData.dataSource.length));
+
+    dispatch(performLoadMore(loadMoreInput));
   };
 
   return (

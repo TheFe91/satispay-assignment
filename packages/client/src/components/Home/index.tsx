@@ -1,10 +1,9 @@
 import React, { useEffect } from 'react';
-import { LazyQueryResult, useLazyQuery, useQuery } from '@apollo/client';
+import { useLazyQuery } from '@apollo/client';
 import { useDispatch } from 'react-redux';
 
-import PokemonQueryResult, { PokemonByTypeQueryVars, PokemonQueryVars, QueryAdapterData } from '@Interfaces/interfaces';
-import { setFilters, setData } from '@State/pokemonSlice';
-import GqlDataAdapter, { GqlTypesAdapter } from '@Helpers/gql_data_adapter';
+import PokemonQueryResult, { PokemonByTypeQueryVars, PokemonQueryVars } from '@Interfaces/interfaces';
+import thunks from '@State/thunks';
 import queries from '@Helpers/queries';
 import ControlsRow from '@Components/ControlsRow';
 import Error from '@Components/Error';
@@ -12,11 +11,14 @@ import Logo from '@Components/Logo';
 import LoadMore from '@Components/LoadMore';
 import MainTable from '@Components/MainTable';
 import './_styles.css';
+import { ExecuteQueryInputType, ExecuteQueryName } from '@State/interfaces';
+
+const { executeQuery } = thunks;
 
 function Home() {
   const dispatch = useDispatch();
 
-  const { loading: tLoading, error: tError, data: tData } = useQuery(queries.TYPES);
+  const [fetchTypes, { loading: tLoading, error: tError }] = useLazyQuery(queries.TYPES);
 
   const [pokemons, {
     loading: pLoading,
@@ -31,19 +33,19 @@ function Home() {
   }] = useLazyQuery<PokemonQueryResult, PokemonByTypeQueryVars>(queries.POKEMONS_BY_TYPE);
 
   useEffect(() => {
-    if (tData) {
-      dispatch(setFilters(GqlTypesAdapter(tData)));
-    }
-  }, [dispatch, tData]);
+    const filtersInput: ExecuteQueryInputType = {
+      name: ExecuteQueryName.FILTERS,
+      executor: fetchTypes,
+    };
 
-  useEffect(() => {
-    pokemons().then((response: LazyQueryResult<PokemonQueryResult, PokemonQueryVars>) => {
-      if (response.data) {
-        const adaptedData: QueryAdapterData = GqlDataAdapter(response.data);
-        dispatch(setData(adaptedData));
-      }
-    });
-  }, [dispatch, pokemons]);
+    const pokemonsInput: ExecuteQueryInputType = {
+      name: ExecuteQueryName.POKEMONS,
+      executor: pokemons,
+    };
+
+    dispatch(executeQuery(filtersInput));
+    dispatch(executeQuery(pokemonsInput));
+  }, [dispatch, fetchTypes, pokemons]);
 
   return pError || pbtError
     ? <Error />
