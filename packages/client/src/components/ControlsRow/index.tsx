@@ -1,20 +1,17 @@
 import { Input, Select } from 'antd';
 import React, { BaseSyntheticEvent, useState } from 'react';
-import { ApolloError, LazyQueryResult, useLazyQuery } from '@apollo/client';
+import { ApolloError, useLazyQuery } from '@apollo/client';
 import { useDispatch, useSelector } from 'react-redux';
 
-import PokemonQueryResult, { PokemonByTypeQueryVars, PokemonQueryVars, QueryAdapterData } from '@Interfaces/interfaces';
-import GqlDataAdapter from '@Helpers/gql_data_adapter';
+import PokemonQueryResult, { PokemonByTypeQueryVars, PokemonQueryVars } from '@Interfaces/interfaces';
 import queries from '@Helpers/queries';
 import selectors from '@State/selectors';
-import {
-  setData, setCurrentSearch, setCurrentQuery, setCurrentTypeFilter,
-} from '@State/pokemonSlice';
+import { setCurrentQuery, setCurrentSearch, setCurrentTypeFilter } from '@State/pokemonSlice';
 import './_styles.css';
 import thunks from '@State/thunks';
-import { PerformSearchInputType } from '@State/interfaces';
+import { PerformSearchOrFilterType } from '@State/interfaces';
 
-const { performSearch } = thunks;
+const { performSearchOrFilter } = thunks;
 
 const {
   getCurrentPageSize,
@@ -68,37 +65,43 @@ function ControlsRow({ tError }: ControlsRowProps) {
         },
       };
 
-    const performSearchInput: PerformSearchInputType = {
+    const performSearchOrFilterInput: PerformSearchOrFilterType = {
       executor: value ? pokemons : pokemonsByType,
       options,
       onSuccess,
     };
 
-    dispatch(performSearch(performSearchInput));
+    dispatch(performSearchOrFilter(performSearchOrFilterInput));
   };
 
   const handleOnSelectChange = async (value: string) => {
-    const response: LazyQueryResult<PokemonQueryResult, PokemonQueryVars | PokemonByTypeQueryVars> = value
-      ? await pokemonsByType({
+    const onSuccess = () => {
+      setSearchInputValue(undefined);
+      dispatch(setCurrentSearch(undefined));
+      dispatch(setCurrentTypeFilter(value));
+      dispatch(setCurrentQuery(value ? 'POKEMONS_BY_TYPE' : 'POKEMONS'));
+    };
+
+    const options = value
+      ? {
         variables: {
           type: value,
           limit: currentPageSize,
         },
-      }) : await pokemons({
+      } : {
         variables: {
           q: currentSearch,
           limit: currentPageSize,
         },
-      });
+      };
 
-    if (response.data) {
-      const adaptedData: QueryAdapterData = GqlDataAdapter(response.data);
-      dispatch(setData(adaptedData));
-    }
-    setSearchInputValue(undefined);
-    dispatch(setCurrentSearch(undefined));
-    dispatch(setCurrentTypeFilter(value));
-    dispatch(setCurrentQuery(value ? 'POKEMONS_BY_TYPE' : 'POKEMONS'));
+    const performSearchOrFilterInput: PerformSearchOrFilterType = {
+      executor: value ? pokemonsByType : pokemons,
+      options,
+      onSuccess,
+    };
+
+    dispatch(performSearchOrFilter(performSearchOrFilterInput));
   };
 
   return (

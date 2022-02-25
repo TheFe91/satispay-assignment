@@ -9,7 +9,7 @@ import {
   ExecuteQueryInputType,
   ExecuteQueryName,
   ExecuteQueryReturnType,
-  PerformSearchInputType,
+  PerformSearchOrFilterType,
 } from '@State/interfaces';
 import GqlDataAdapter, { GqlTypesAdapter } from '@Helpers/gql_data_adapter';
 
@@ -31,8 +31,8 @@ const executeQuery = createAsyncThunk<ExecuteQueryReturnType, ExecuteQueryInputT
   },
 );
 
-const performSearch = createAsyncThunk<QueryAdapterData, PerformSearchInputType>(
-  'pokemon/performSearch',
+const performSearchOrFilter = createAsyncThunk<QueryAdapterData, PerformSearchOrFilterType>(
+  'pokemon/performSearchOrFilter',
   async ({ executor, options, onSuccess }) => {
     const response: LazyQueryResult<PokemonQueryResult, PokemonQueryVars | PokemonByTypeQueryVars> = await executor(options);
 
@@ -52,5 +52,5 @@ const performSearch = createAsyncThunk<QueryAdapterData, PerformSearchInputType>
 
 export default {
   executeQuery,
-  performSearch,
+  performSearchOrFilter,
 };

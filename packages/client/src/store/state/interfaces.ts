@@ -14,7 +14,7 @@ interface PerformSearchOptions {
   variables: PokemonQueryVars | PokemonByTypeQueryVars;
 }
 
-interface PerformSearchInputType {
+interface PerformSearchOrFilterType {
   executor: Function;
   options?: PerformSearchOptions;
   onSuccess: Function;
@@ -30,5 +30,5 @@ export type {
   ExecuteQueryInputType,
   ExecuteQueryReturnType,
 
-  PerformSearchInputType,
+  PerformSearchOrFilterType,
 };

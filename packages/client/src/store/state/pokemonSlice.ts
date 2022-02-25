@@ -7,7 +7,7 @@ import { NoInfer } from '@reduxjs/toolkit/dist/tsHelpers';
 import { ExecuteQueryName, ExecuteQueryReturnType } from '@State/interfaces';
 import thunks from './thunks';
 
-const { executeQuery, performSearch } = thunks;
+const { executeQuery, performSearchOrFilter } = thunks;
 
 const STANDARD_PAGE_SIZE: number = 10;
 
@@ -65,7 +65,7 @@ export const pokemonSlice = createSlice({
           state.data = value as QueryAdapterData;
         }
       })
-      .addCase(performSearch.fulfilled, (state: Draft<CounterState>, action: PayloadAction<QueryAdapterData>) => {
+      .addCase(performSearchOrFilter.fulfilled, (state: Draft<CounterState>, action: PayloadAction<QueryAdapterData>) => {
         state.data = action.payload;
       });
   },
