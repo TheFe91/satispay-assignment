@@ -1,4 +1,4 @@
-import PokemonQueryResult, { Edge, PokemonDataSource, QueryAdapterData } from '../interfaces/interfaces';
+import PokemonQueryResult, { Edge, PokemonDataSource, QueryAdapterData } from '@Interfaces/interfaces';
 
 function GqlDataAdapter(data: PokemonQueryResult): QueryAdapterData {
   const { pokemonsByType, pokemons } = data;

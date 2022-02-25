@@ -1,16 +1,17 @@
 import React, { useEffect } from 'react';
 import { LazyQueryResult, useLazyQuery, useQuery } from '@apollo/client';
 import { useDispatch } from 'react-redux';
-import GqlDataAdapter, { GqlTypesAdapter } from '../../helpers/gql_data_adapter';
-import PokemonQueryResult, { PokemonByTypeQueryVars, PokemonQueryVars, QueryAdapterData } from '../../interfaces/interfaces';
-import queries from '../../helpers/queries';
+
+import PokemonQueryResult, { PokemonByTypeQueryVars, PokemonQueryVars, QueryAdapterData } from '@Interfaces/interfaces';
+import { setFilters, setData } from '@State/pokemonSlice';
+import GqlDataAdapter, { GqlTypesAdapter } from '@Helpers/gql_data_adapter';
+import queries from '@Helpers/queries';
+import ControlsRow from '@Components/ControlsRow';
+import Error from '@Components/Error';
+import Logo from '@Components/Logo';
+import LoadMore from '@Components/LoadMore';
+import MainTable from '@Components/MainTable';
 import './_styles.css';
-import ControlsRow from '../ControlsRow';
-import Error from '../Error';
-import Logo from '../Logo';
-import LoadMore from '../LoadMore';
-import MainTable from '../MainTable';
-import { setFilters, setData } from '../../store/state/pokemonSlice';
 
 function Home() {
   const dispatch = useDispatch();
