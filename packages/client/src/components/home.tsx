@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
-import { Table } from 'antd';
 import { LazyQueryResult, useLazyQuery, useQuery } from '@apollo/client';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import GqlDataAdapter, { GqlTypesAdapter } from '../helpers/gql_data_adapter';
 import PokemonQueryResult, { PokemonByTypeQueryVars, PokemonQueryVars, QueryAdapterData } from '../interfaces/interfaces';
 import queries from '../helpers/queries';
@@ -10,32 +9,11 @@ import ControlsRow from './ControlsRow';
 import Error from './Error';
 import Logo from './Logo';
 import LoadMore from './LoadMore';
+import MainTable from './MainTable';
 import { setFilters, setData } from '../store/state/pokemonSlice';
-import selectors from '../store/state/selectors';
-
-const { getData } = selectors;
-
-const columns = [
-  {
-    title: 'Name',
-    dataIndex: 'name',
-    key: 'name',
-  },
-  {
-    title: 'Types',
-    dataIndex: 'types',
-    key: 'types',
-  },
-  {
-    title: 'Classification',
-    dataIndex: 'classification',
-    key: 'classification',
-  },
-];
 
 function Home() {
   const dispatch = useDispatch();
-  const { dataSource }: QueryAdapterData = useSelector(getData);
 
   const { loading: tLoading, error: tError, data: tData } = useQuery(queries.TYPES);
 
@@ -75,18 +53,17 @@ function Home() {
 
         <ControlsRow tError={tError} />
 
-        <Table
-          bordered
-          columns={columns}
-          dataSource={dataSource}
-          loading={pLoading || pbtLoading || tLoading}
-          pagination={false}
+        <MainTable
+          pbtLoading={pbtLoading}
+          pLoading={pLoading}
+          tLoading={tLoading}
         />
 
         <LoadMore
           pbtFetchMore={pbtFetchMore}
           pFetchMore={pFetchMore}
         />
+
       </div>
     );
 }

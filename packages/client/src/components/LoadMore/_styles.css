@@ -1,0 +1,28 @@
+.load-more-container {
+    display: flex;
+    justify-content: right;
+    align-items: center;
+    margin-top: 1rem;
+    padding-bottom: 1rem;
+}
+
+.ant-btn.ant-btn-primary {
+    border-color: #1f68af;
+    background: #1f68af;
+}
+
+.ant-btn.ant-btn-primary:hover,
+.ant-btn.ant-btn-primary:focus,
+.ant-btn.ant-btn-primary:active {
+    border-color: #ffc72b;
+    background: #ffc72b;
+    color: #1f68af;
+}
+
+.ant-btn.ant-btn-primary[disabled],
+.ant-btn.ant-btn-primary[disabled]:hover {
+    border-color: #1f68af;
+    background: #1f68af;
+    opacity: .5;
+    color: white;
+}

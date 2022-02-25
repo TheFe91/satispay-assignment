@@ -2,10 +2,11 @@ import { ApolloQueryResult } from '@apollo/client';
 import { Button } from 'antd';
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import PokemonQueryResult, { QueryAdapterData } from '../interfaces/interfaces';
-import GqlDataAdapter from '../helpers/gql_data_adapter';
-import selectors from '../store/state/selectors';
-import { setData, setCurrentPageSize } from '../store/state/pokemonSlice';
+import PokemonQueryResult, { QueryAdapterData } from '../../interfaces/interfaces';
+import GqlDataAdapter from '../../helpers/gql_data_adapter';
+import selectors from '../../store/state/selectors';
+import { setData, setCurrentPageSize } from '../../store/state/pokemonSlice';
+import './_styles.css';
 
 const {
   getData, getCurrentQuery, getCurrentSearch, getCurrentTypeFilter,
