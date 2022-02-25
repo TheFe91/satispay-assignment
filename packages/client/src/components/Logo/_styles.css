@@ -1,0 +1,16 @@
+.logo-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 3rem;
+}
+
+.logo-img {
+    width: 15%;
+}
+
+.subtitle {
+    font-style: italic;
+    margin-top: .5rem;
+}

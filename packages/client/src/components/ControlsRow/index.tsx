@@ -2,13 +2,14 @@ import { Input, Select } from 'antd';
 import React, { BaseSyntheticEvent, useState } from 'react';
 import { ApolloError, LazyQueryResult, useLazyQuery } from '@apollo/client';
 import { useDispatch, useSelector } from 'react-redux';
-import PokemonQueryResult, { PokemonByTypeQueryVars, PokemonQueryVars, QueryAdapterData } from '../interfaces/interfaces';
-import GqlDataAdapter from '../helpers/gql_data_adapter';
-import queries from '../helpers/queries';
-import selectors from '../store/state/selectors';
+import PokemonQueryResult, { PokemonByTypeQueryVars, PokemonQueryVars, QueryAdapterData } from '../../interfaces/interfaces';
+import GqlDataAdapter from '../../helpers/gql_data_adapter';
+import queries from '../../helpers/queries';
+import selectors from '../../store/state/selectors';
 import {
   setData, setCurrentSearch, setCurrentQuery, setCurrentTypeFilter,
-} from '../store/state/pokemonSlice';
+} from '../../store/state/pokemonSlice';
+import './_styles.css';
 
 const {
   getCurrentPageSize,

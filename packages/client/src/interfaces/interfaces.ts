@@ -50,13 +50,20 @@ interface QueryAdapterData {
   nodes: Array<Node>;
 }
 
+interface TableColumn {
+  title: string;
+  dataIndex: string;
+  key: string;
+}
+
 export default PokemonQueryResult;
 
 export type {
   Edge,
   Node,
-  PokemonDataSource,
-  QueryAdapterData,
-  PokemonQueryVars,
   PokemonByTypeQueryVars,
+  PokemonDataSource,
+  PokemonQueryVars,
+  QueryAdapterData,
+  TableColumn,
 };

@@ -1,32 +1,9 @@
-.container {
-    margin: 2rem;
-}
-
-.controls-row {
-    display: flex;
-    justify-content: right;
-    gap: 1rem;
-    margin-bottom: 1rem;
-}
-
 .load-more-container {
     display: flex;
     justify-content: right;
     align-items: center;
     margin-top: 1rem;
     padding-bottom: 1rem;
-}
-
-.logo-container {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    margin-bottom: 3rem;
-}
-
-.logo-img {
-    width: 15%;
 }
 
 .ant-btn.ant-btn-primary {
@@ -48,9 +25,4 @@
     background: #1f68af;
     opacity: .5;
     color: white;
-}
-
-.subtitle {
-    font-style: italic;
-    margin-top: .5rem;
 }
