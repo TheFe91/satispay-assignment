@@ -1,7 +1,7 @@
 import { Input, Select } from 'antd';
-import React from 'react';
+import React, { BaseSyntheticEvent, useState } from 'react';
 import { ApolloError, LazyQueryResult, useLazyQuery } from '@apollo/client';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import PokemonQueryResult, { PokemonByTypeQueryVars, PokemonQueryVars, QueryAdapterData } from '../interfaces/interfaces';
 import GqlDataAdapter from '../helpers/gql_data_adapter';
 import queries from '../helpers/queries';
@@ -25,6 +25,10 @@ interface ControlsRowProps {
 }
 
 function ControlsRow({ tError }: ControlsRowProps) {
+  const dispatch = useDispatch();
+
+  const [searchInputValue, setSearchInputValue] = useState(undefined);
+
   const currentPageSize: number = useSelector(getCurrentPageSize);
   const currentTypeFilter: string | undefined = useSelector(getCurrentTypeFilter);
   const currentSearch: string | undefined = useSelector(getCurrentSearch);
@@ -32,6 +36,10 @@ function ControlsRow({ tError }: ControlsRowProps) {
 
   const [pokemons] = useLazyQuery<PokemonQueryResult, PokemonQueryVars>(queries.POKEMONS);
   const [pokemonsByType] = useLazyQuery<PokemonQueryResult, PokemonByTypeQueryVars>(queries.POKEMONS_BY_TYPE);
+
+  const handleOnChangeSearchInputValue = ({ target: { value } }: BaseSyntheticEvent) => {
+    setSearchInputValue(value);
+  };
 
   const handleSearching = async (value: string) => {
     const response: LazyQueryResult<PokemonQueryResult, PokemonQueryVars | PokemonByTypeQueryVars> = value
@@ -50,11 +58,11 @@ function ControlsRow({ tError }: ControlsRowProps) {
 
     if (response.data) {
       const adaptedData: QueryAdapterData = GqlDataAdapter(response.data);
-      setData(adaptedData);
+      dispatch(setData(adaptedData));
     }
-    setCurrentSearch(value);
-    setCurrentTypeFilter(undefined);
-    setCurrentQuery(value && !currentTypeFilter ? 'POKEMONS' : 'POKEMONS_BY_TYPE');
+    dispatch(setCurrentSearch(value));
+    dispatch(setCurrentTypeFilter(undefined));
+    dispatch(setCurrentQuery(value && !currentTypeFilter ? 'POKEMONS' : 'POKEMONS_BY_TYPE'));
   };
 
   const handleOnSelectChange = async (value: string) => {
@@ -73,20 +81,22 @@ function ControlsRow({ tError }: ControlsRowProps) {
 
     if (response.data) {
       const adaptedData: QueryAdapterData = GqlDataAdapter(response.data);
-      setData(adaptedData);
+      dispatch(setData(adaptedData));
     }
-    setCurrentSearch(undefined);
-    setCurrentTypeFilter(value);
-    setCurrentQuery(value ? 'POKEMONS_BY_TYPE' : 'POKEMONS');
+    setSearchInputValue(undefined);
+    dispatch(setCurrentSearch(undefined));
+    dispatch(setCurrentTypeFilter(value));
+    dispatch(setCurrentQuery(value ? 'POKEMONS_BY_TYPE' : 'POKEMONS'));
   };
 
   return (
     <div className="controls-row">
       <Search
+        onChange={handleOnChangeSearchInputValue}
         onSearch={handleSearching}
         placeholder="Filter by Pokémon"
         style={{ width: 200 }}
-        value={currentSearch}
+        value={searchInputValue}
       />
 
       {tError
