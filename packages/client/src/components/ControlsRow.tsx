@@ -1,38 +1,36 @@
 import { Input, Select } from 'antd';
 import React from 'react';
 import { ApolloError, LazyQueryResult, useLazyQuery } from '@apollo/client';
+import { useSelector } from 'react-redux';
 import PokemonQueryResult, { PokemonByTypeQueryVars, PokemonQueryVars, QueryAdapterData } from '../interfaces/interfaces';
 import GqlDataAdapter from '../helpers/gql_data_adapter';
 import queries from '../helpers/queries';
+import selectors from '../store/state/selectors';
+import {
+  setData, setCurrentSearch, setCurrentQuery, setCurrentTypeFilter,
+} from '../store/state/pokemonSlice';
+
+const {
+  getCurrentPageSize,
+  getCurrentTypeFilter,
+  getCurrentSearch,
+  getFilters,
+} = selectors;
 
 const { Search } = Input;
 const { Option } = Select;
 
 interface ControlsRowProps {
-  filters: Array<string>;
-  currentPageSize: number;
-  currentTypeFilter: string | undefined;
-  setData: Function;
-  setCurrentSearch: Function;
-  setCurrentTypeFilter: Function;
-  setCurrentQuery: Function;
-  currentSearch: string | undefined;
   tError: ApolloError | undefined;
 }
 
-function ControlsRow({
-  filters,
-  currentPageSize,
-  currentTypeFilter,
-  setData,
-  setCurrentSearch,
-  setCurrentTypeFilter,
-  setCurrentQuery,
-  currentSearch,
-  tError,
-}: ControlsRowProps) {
-  const [pokemons] = useLazyQuery<PokemonQueryResult, PokemonQueryVars>(queries.POKEMONS);
+function ControlsRow({ tError }: ControlsRowProps) {
+  const currentPageSize: number = useSelector(getCurrentPageSize);
+  const currentTypeFilter: string | undefined = useSelector(getCurrentTypeFilter);
+  const currentSearch: string | undefined = useSelector(getCurrentSearch);
+  const filters: Array<string> = useSelector(getFilters);
 
+  const [pokemons] = useLazyQuery<PokemonQueryResult, PokemonQueryVars>(queries.POKEMONS);
   const [pokemonsByType] = useLazyQuery<PokemonQueryResult, PokemonByTypeQueryVars>(queries.POKEMONS_BY_TYPE);
 
   const handleSearching = async (value: string) => {
@@ -56,7 +54,7 @@ function ControlsRow({
     }
     setCurrentSearch(value);
     setCurrentTypeFilter(undefined);
-    setCurrentQuery(value && !currentTypeFilter ? queries.POKEMONS : queries.POKEMONS_BY_TYPE);
+    setCurrentQuery(value && !currentTypeFilter ? 'POKEMONS' : 'POKEMONS_BY_TYPE');
   };
 
   const handleOnSelectChange = async (value: string) => {
@@ -79,7 +77,7 @@ function ControlsRow({
     }
     setCurrentSearch(undefined);
     setCurrentTypeFilter(value);
-    setCurrentQuery(value ? queries.POKEMONS_BY_TYPE : queries.POKEMONS);
+    setCurrentQuery(value ? 'POKEMONS_BY_TYPE' : 'POKEMONS');
   };
 
   return (

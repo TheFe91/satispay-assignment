@@ -1,34 +1,65 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+/* eslint-disable no-param-reassign */
+import { createSlice, Draft, PayloadAction } from '@reduxjs/toolkit';
+import { QueryAdapterData } from '../../interfaces/interfaces';
+
+const STANDARD_PAGE_SIZE: number = 10;
 
 export interface CounterState {
-  value: number
+  currentSearch: string | undefined;
+  currentTypeFilter: string | undefined;
+  currentPageSize: number;
+  currentQuery: string;
+  filters: Array<string>;
+  data: QueryAdapterData;
 }
 
 const initialState: CounterState = {
-  value: 0,
+  currentSearch: undefined,
+  currentTypeFilter: undefined,
+  currentPageSize: STANDARD_PAGE_SIZE,
+  currentQuery: 'POKEMONS',
+  filters: [],
+  data: {
+    nodes: [],
+    dataSource: [],
+    hasNextPage: false,
+    endCursor: '',
+  },
 };
 
-export const counterSlice = createSlice({
-  name: 'counter',
+export const pokemonSlice = createSlice({
+  name: 'pokemon',
   initialState,
   reducers: {
-    increment: (state) => {
-      // Redux Toolkit allows us to write "mutating" logic in reducers. It
-      // doesn't actually mutate the state because it uses the Immer library,
-      // which detects changes to a "draft state" and produces a brand new
-      // immutable state based off those changes
-      state.value += 1;
+    setCurrentSearch: (state: Draft<CounterState>, action: PayloadAction<string | undefined>) => {
+      state.currentSearch = action.payload;
     },
-    decrement: (state) => {
-      state.value -= 1;
+    setCurrentTypeFilter: (state: Draft<CounterState>, action: PayloadAction<string | undefined>) => {
+      state.currentTypeFilter = action.payload;
     },
-    incrementByAmount: (state, action: PayloadAction<number>) => {
-      state.value += action.payload;
+    setCurrentPageSize: (state: Draft<CounterState>, action: PayloadAction<number>) => {
+      state.currentPageSize = action.payload;
+    },
+    setCurrentQuery: (state: Draft<CounterState>, action: PayloadAction<string>) => {
+      state.currentQuery = action.payload;
+    },
+    setFilters: (state: Draft<CounterState>, action: PayloadAction<Array<string>>) => {
+      state.filters = action.payload;
+    },
+    setData: (state: Draft<CounterState>, action: PayloadAction<QueryAdapterData>) => {
+      state.data = action.payload;
     },
   },
 });
 
 // Action creators are generated for each case reducer function
-export const { increment, decrement, incrementByAmount } = counterSlice.actions;
+export const {
+  setCurrentSearch,
+  setCurrentTypeFilter,
+  setCurrentPageSize,
+  setCurrentQuery,
+  setFilters,
+  setData,
+} = pokemonSlice.actions;
 
-export default counterSlice.reducer;
+export default pokemonSlice.reducer;

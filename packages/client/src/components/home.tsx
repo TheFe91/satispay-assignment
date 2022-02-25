@@ -1,8 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { Table } from 'antd';
-import {
-  DocumentNode, LazyQueryResult, useLazyQuery, useQuery,
-} from '@apollo/client';
+import { LazyQueryResult, useLazyQuery, useQuery } from '@apollo/client';
+import { useDispatch, useSelector } from 'react-redux';
 import GqlDataAdapter, { GqlTypesAdapter } from '../helpers/gql_data_adapter';
 import PokemonQueryResult, { PokemonByTypeQueryVars, PokemonQueryVars, QueryAdapterData } from '../interfaces/interfaces';
 import queries from '../helpers/queries';
@@ -11,6 +10,10 @@ import ControlsRow from './ControlsRow';
 import Error from './Error';
 import Logo from './Logo';
 import LoadMore from './LoadMore';
+import { setFilters, setData } from '../store/state/pokemonSlice';
+import selectors from '../store/state/selectors';
+
+const { getData } = selectors;
 
 const columns = [
   {
@@ -30,41 +33,38 @@ const columns = [
   },
 ];
 
-const STANDARD_PAGE_SIZE: number = 10;
-
 function Home() {
-  const [currentSearch, setCurrentSearch] = useState<string | undefined>(undefined);
-  const [currentTypeFilter, setCurrentTypeFilter] = useState<string | undefined>(undefined);
-  const [currentPageSize, setCurrentPageSize] = useState<number>(STANDARD_PAGE_SIZE);
-  const [currentQuery, setCurrentQuery] = useState<DocumentNode>(queries.POKEMONS);
-  const [filters, setFilters] = useState<Array<string>>([]);
-
-  const [data, setData] = useState<QueryAdapterData>({
-    nodes: [], dataSource: [], hasNextPage: false, endCursor: '',
-  });
+  const dispatch = useDispatch();
+  const { dataSource }: QueryAdapterData = useSelector(getData);
 
   const { loading: tLoading, error: tError, data: tData } = useQuery(queries.TYPES);
 
   const [pokemons, {
-    loading: pLoading, error: pError, fetchMore: pFetchMore,
+    loading: pLoading,
+    error: pError,
+    fetchMore: pFetchMore,
   }] = useLazyQuery<PokemonQueryResult, PokemonQueryVars>(queries.POKEMONS);
 
   const [, {
-    loading: pbtLoading, error: pbtError, fetchMore: pbtFetchMore,
+    loading: pbtLoading,
+    error: pbtError,
+    fetchMore: pbtFetchMore,
   }] = useLazyQuery<PokemonQueryResult, PokemonByTypeQueryVars>(queries.POKEMONS_BY_TYPE);
 
   useEffect(() => {
-    setFilters(GqlTypesAdapter(tData));
-  }, [tData]);
+    if (tData) {
+      dispatch(setFilters(GqlTypesAdapter(tData)));
+    }
+  }, [dispatch, tData]);
 
   useEffect(() => {
     pokemons().then((response: LazyQueryResult<PokemonQueryResult, PokemonQueryVars>) => {
       if (response.data) {
         const adaptedData: QueryAdapterData = GqlDataAdapter(response.data);
-        setData(adaptedData);
+        dispatch(setData(adaptedData));
       }
     });
-  }, [pokemons]);
+  }, [dispatch, pokemons]);
 
   return pError || pbtError
     ? <Error />
@@ -73,35 +73,19 @@ function Home() {
 
         <Logo />
 
-        <ControlsRow
-          currentPageSize={currentPageSize}
-          currentSearch={currentSearch}
-          currentTypeFilter={currentTypeFilter}
-          filters={filters}
-          setCurrentQuery={setCurrentQuery}
-          setCurrentSearch={setCurrentSearch}
-          setCurrentTypeFilter={setCurrentTypeFilter}
-          setData={setData}
-          tError={tError}
-        />
+        <ControlsRow tError={tError} />
 
         <Table
           bordered
           columns={columns}
-          dataSource={data.dataSource}
+          dataSource={dataSource}
           loading={pLoading || pbtLoading || tLoading}
           pagination={false}
         />
 
         <LoadMore
-          currentQuery={currentQuery}
-          currentSearch={currentSearch}
-          currentTypeFilter={currentTypeFilter}
-          data={data}
           pbtFetchMore={pbtFetchMore}
           pFetchMore={pFetchMore}
-          setCurrentPageSize={setCurrentPageSize}
-          setData={setData}
         />
       </div>
     );
