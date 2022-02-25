@@ -20,6 +20,11 @@ interface PerformSearchOrFilterType {
   onSuccess: Function;
 }
 
+interface PerformLoadMoreType {
+  executor: Function;
+  options: PerformSearchOptions;
+}
+
 export enum ExecuteQueryName {
   FILTERS = 'FILTERS',
   POKEMONS = 'POKEMON',
@@ -30,5 +35,7 @@ export type {
   ExecuteQueryInputType,
   ExecuteQueryReturnType,
 
+  PerformSearchOptions,
   PerformSearchOrFilterType,
+  PerformLoadMoreType,
 };

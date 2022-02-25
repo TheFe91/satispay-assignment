@@ -9,9 +9,14 @@ import {
   ExecuteQueryInputType,
   ExecuteQueryName,
   ExecuteQueryReturnType,
+  PerformLoadMoreType,
   PerformSearchOrFilterType,
 } from '@State/interfaces';
 import GqlDataAdapter, { GqlTypesAdapter } from '@Helpers/gql_data_adapter';
+import selectors from '@State/selectors';
+import { RootState } from '@Store/configureStore';
+
+const { getData } = selectors;
 
 const executeQuery = createAsyncThunk<ExecuteQueryReturnType, ExecuteQueryInputType>(
   'pokemon/executeQuery',
@@ -50,7 +55,35 @@ const performSearchOrFilter = createAsyncThunk<QueryAdapterData, PerformSearchOr
   },
 );
 
+const performLoadMore = createAsyncThunk<QueryAdapterData, PerformLoadMoreType>(
+  'pokemon/performLoadMore',
+  async ({ executor, options }, { getState }) => {
+    const { dataSource, nodes }: QueryAdapterData = getData(getState() as RootState);
+    const response: LazyQueryResult<PokemonQueryResult, PokemonQueryVars | PokemonByTypeQueryVars> = await executor(options);
+
+    if (response.data) {
+      const adaptedData = GqlDataAdapter(response.data);
+      const newData: QueryAdapterData = {
+        dataSource: [...dataSource, ...adaptedData.dataSource],
+        nodes: [...nodes, ...adaptedData.nodes],
+        endCursor: adaptedData.endCursor,
+        hasNextPage: adaptedData.hasNextPage,
+      };
+
+      return newData;
+    }
+
+    return {
+      hasNextPage: false,
+      endCursor: '',
+      dataSource: [],
+      nodes: [],
+    };
+  },
+);
+
 export default {
   executeQuery,
   performSearchOrFilter,
+  performLoadMore,
 };

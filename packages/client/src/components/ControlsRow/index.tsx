@@ -9,7 +9,7 @@ import selectors from '@State/selectors';
 import { setCurrentQuery, setCurrentSearch, setCurrentTypeFilter } from '@State/pokemonSlice';
 import './_styles.css';
 import thunks from '@State/thunks';
-import { PerformSearchOrFilterType } from '@State/interfaces';
+import { PerformSearchOptions, PerformSearchOrFilterType } from '@State/interfaces';
 
 const { performSearchOrFilter } = thunks;
 
@@ -51,7 +51,7 @@ function ControlsRow({ tError }: ControlsRowProps) {
       dispatch(setCurrentQuery(value && !currentTypeFilter ? 'POKEMONS' : 'POKEMONS_BY_TYPE'));
     };
 
-    const options = value
+    const options: PerformSearchOptions = value
       ? {
         variables: {
           q: value,
@@ -82,7 +82,7 @@ function ControlsRow({ tError }: ControlsRowProps) {
       dispatch(setCurrentQuery(value ? 'POKEMONS_BY_TYPE' : 'POKEMONS'));
     };
 
-    const options = value
+    const options: PerformSearchOptions = value
       ? {
         variables: {
           type: value,
