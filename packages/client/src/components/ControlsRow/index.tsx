@@ -11,6 +11,10 @@ import {
   setData, setCurrentSearch, setCurrentQuery, setCurrentTypeFilter,
 } from '@State/pokemonSlice';
 import './_styles.css';
+import thunks from '@State/thunks';
+import { PerformSearchInputType } from '@State/interfaces';
+
+const { performSearch } = thunks;
 
 const {
   getCurrentPageSize,
@@ -44,27 +48,33 @@ function ControlsRow({ tError }: ControlsRowProps) {
   };
 
   const handleSearching = async (value: string) => {
-    const response: LazyQueryResult<PokemonQueryResult, PokemonQueryVars | PokemonByTypeQueryVars> = value
-      ? await pokemons({
+    const onSuccess = () => {
+      dispatch(setCurrentSearch(value));
+      dispatch(setCurrentTypeFilter(undefined));
+      dispatch(setCurrentQuery(value && !currentTypeFilter ? 'POKEMONS' : 'POKEMONS_BY_TYPE'));
+    };
+
+    const options = value
+      ? {
         variables: {
           q: value,
           limit: currentPageSize,
         },
-      })
-      : await pokemonsByType({
+      }
+      : {
         variables: {
           type: currentTypeFilter,
           limit: currentPageSize,
         },
-      });
+      };
 
-    if (response.data) {
-      const adaptedData: QueryAdapterData = GqlDataAdapter(response.data);
-      dispatch(setData(adaptedData));
-    }
-    dispatch(setCurrentSearch(value));
-    dispatch(setCurrentTypeFilter(undefined));
-    dispatch(setCurrentQuery(value && !currentTypeFilter ? 'POKEMONS' : 'POKEMONS_BY_TYPE'));
+    const performSearchInput: PerformSearchInputType = {
+      executor: value ? pokemons : pokemonsByType,
+      options,
+      onSuccess,
+    };
+
+    dispatch(performSearch(performSearchInput));
   };
 
   const handleOnSelectChange = async (value: string) => {

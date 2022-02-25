@@ -1,6 +1,13 @@
 /* eslint-disable no-param-reassign */
-import { createSlice, Draft, PayloadAction } from '@reduxjs/toolkit';
+import {
+  ActionReducerMapBuilder, createSlice, Draft, PayloadAction,
+} from '@reduxjs/toolkit';
 import { QueryAdapterData } from '@Interfaces/interfaces';
+import { NoInfer } from '@reduxjs/toolkit/dist/tsHelpers';
+import { ExecuteQueryName, ExecuteQueryReturnType } from '@State/interfaces';
+import thunks from './thunks';
+
+const { executeQuery, performSearch } = thunks;
 
 const STANDARD_PAGE_SIZE: number = 10;
 
@@ -43,12 +50,24 @@ export const pokemonSlice = createSlice({
     setCurrentQuery: (state: Draft<CounterState>, action: PayloadAction<string>) => {
       state.currentQuery = action.payload;
     },
-    setFilters: (state: Draft<CounterState>, action: PayloadAction<Array<string>>) => {
-      state.filters = action.payload;
-    },
     setData: (state: Draft<CounterState>, action: PayloadAction<QueryAdapterData>) => {
       state.data = action.payload;
     },
+  },
+  extraReducers: (builder: ActionReducerMapBuilder<NoInfer<CounterState>>) => {
+    builder
+      .addCase(executeQuery.fulfilled, (state: Draft<CounterState>, action: PayloadAction<ExecuteQueryReturnType>) => {
+        const { name, value } = action.payload;
+
+        if (name === ExecuteQueryName.FILTERS) {
+          state.filters = value as Array<string>;
+        } else {
+          state.data = value as QueryAdapterData;
+        }
+      })
+      .addCase(performSearch.fulfilled, (state: Draft<CounterState>, action: PayloadAction<QueryAdapterData>) => {
+        state.data = action.payload;
+      });
   },
 });
 
@@ -58,7 +77,6 @@ export const {
   setCurrentTypeFilter,
   setCurrentPageSize,
   setCurrentQuery,
-  setFilters,
   setData,
 } = pokemonSlice.actions;
 
