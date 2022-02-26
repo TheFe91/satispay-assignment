@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useLazyQuery } from '@apollo/client';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 import PokemonQueryResult, { PokemonByTypeQueryVars, PokemonQueryVars } from '@Interfaces/interfaces';
 import thunks from '@State/thunks';
@@ -12,25 +12,22 @@ import LoadMore from '@Components/LoadMore';
 import MainTable from '@Components/MainTable';
 import './_styles.css';
 import { ExecuteQueryInputType, ExecuteQueryName } from '@State/interfaces';
+import selectors from '@State/selectors';
+
+const { getIsErrorFilters, getIsErrorData } = selectors;
 
 const { executeQuery } = thunks;
 
 function Home() {
   const dispatch = useDispatch();
+  const isErrorFilters: boolean = useSelector(getIsErrorFilters);
+  const isErrorData: boolean = useSelector(getIsErrorData);
 
-  const [fetchTypes, { loading: tLoading, error: tError }] = useLazyQuery(queries.TYPES);
+  const [fetchTypes] = useLazyQuery(queries.TYPES);
 
-  const [pokemons, {
-    loading: pLoading,
-    error: pError,
-    fetchMore: pFetchMore,
-  }] = useLazyQuery<PokemonQueryResult, PokemonQueryVars>(queries.POKEMONS);
+  const [pokemons, { fetchMore: pFetchMore }] = useLazyQuery<PokemonQueryResult, PokemonQueryVars>(queries.POKEMONS);
 
-  const [, {
-    loading: pbtLoading,
-    error: pbtError,
-    fetchMore: pbtFetchMore,
-  }] = useLazyQuery<PokemonQueryResult, PokemonByTypeQueryVars>(queries.POKEMONS_BY_TYPE);
+  const [, { fetchMore: pbtFetchMore }] = useLazyQuery<PokemonQueryResult, PokemonByTypeQueryVars>(queries.POKEMONS_BY_TYPE);
 
   useEffect(() => {
     const filtersInput: ExecuteQueryInputType = {
@@ -47,20 +44,16 @@ function Home() {
     dispatch(executeQuery(pokemonsInput));
   }, [dispatch, fetchTypes, pokemons]);
 
-  return pError || pbtError
+  return isErrorData || isErrorFilters
     ? <Error />
     : (
       <div className="container">
 
         <Logo />
 
-        <ControlsRow tError={tError} />
+        <ControlsRow />
 
-        <MainTable
-          pbtLoading={pbtLoading}
-          pLoading={pLoading}
-          tLoading={tLoading}
-        />
+        <MainTable />
 
         <LoadMore
           pbtFetchMore={pbtFetchMore}

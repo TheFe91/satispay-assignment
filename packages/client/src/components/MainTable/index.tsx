@@ -6,23 +6,18 @@ import { QueryAdapterData } from '@Interfaces/interfaces';
 import selectors from '@State/selectors';
 import columns from './columns';
 
-const { getData } = selectors;
+const { getData, getIsFetchingData } = selectors;
 
-interface MainTableProps {
-  pLoading: boolean;
-  pbtLoading: boolean;
-  tLoading: boolean;
-}
-
-function MainTable({ pLoading, pbtLoading, tLoading }: MainTableProps) {
+function MainTable() {
   const { dataSource }: QueryAdapterData = useSelector(getData);
+  const isFetchingData = useSelector(getIsFetchingData);
 
   return (
     <Table
       bordered
       columns={columns}
       dataSource={dataSource}
-      loading={pLoading || pbtLoading || tLoading}
+      loading={isFetchingData}
       pagination={false}
     />
   );

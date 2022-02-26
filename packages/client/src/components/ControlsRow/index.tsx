@@ -1,6 +1,6 @@
 import { Input, Select } from 'antd';
 import React, { BaseSyntheticEvent, useState } from 'react';
-import { ApolloError, useLazyQuery } from '@apollo/client';
+import { useLazyQuery } from '@apollo/client';
 import { useDispatch, useSelector } from 'react-redux';
 
 import PokemonQueryResult, { PokemonByTypeQueryVars, PokemonQueryVars } from '@Interfaces/interfaces';
@@ -17,17 +17,14 @@ const {
   getCurrentPageSize,
   getCurrentTypeFilter,
   getCurrentSearch,
+  getIsErrorFilters,
   getFilters,
 } = selectors;
 
 const { Search } = Input;
 const { Option } = Select;
 
-interface ControlsRowProps {
-  tError: ApolloError | undefined;
-}
-
-function ControlsRow({ tError }: ControlsRowProps) {
+function ControlsRow() {
   const dispatch = useDispatch();
 
   const [searchInputValue, setSearchInputValue] = useState(undefined);
@@ -35,6 +32,7 @@ function ControlsRow({ tError }: ControlsRowProps) {
   const currentPageSize: number = useSelector(getCurrentPageSize);
   const currentTypeFilter: string | undefined = useSelector(getCurrentTypeFilter);
   const currentSearch: string | undefined = useSelector(getCurrentSearch);
+  const isErrorFilters: boolean = useSelector(getIsErrorFilters);
   const filters: Array<string> = useSelector(getFilters);
 
   const [pokemons] = useLazyQuery<PokemonQueryResult, PokemonQueryVars>(queries.POKEMONS);
@@ -114,7 +112,7 @@ function ControlsRow({ tError }: ControlsRowProps) {
         value={searchInputValue}
       />
 
-      {tError
+      {isErrorFilters
         ? (<p>Filtering by type is not available</p>)
         : (
           <Select
